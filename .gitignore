@@ -1,0 +1,3 @@
+*.swp
+credentials.yml
+__pycache__

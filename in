@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import json
+
+from common import source, payload, client
+
+dest = sys.argv[ 1 ]
+
+if not os.path.exists( dest ):
+	os.makedirs( dest )
+
+id = ""
+
+try:
+	inspect = client.inspect_container( source[ 'name' ] )
+
+	with open( ("%s/inspect" % dest), "w" ) as f:
+		f.write( json.dumps( inspect, indent=2 ) )
+		id = inspect[ 'Id' ]
+except Exception as e:
+	print( "Unable to inspect container", e )
+
+print(json.dumps({'version':{'ref':id}}), file=sys.__stdout__)
+

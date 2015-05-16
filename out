@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+
+import sys
+
+from common import stop_container, params, source, client
+
+if params[ 'cmd' ] == 'run':
+	if params.get( 'remove', 1 ) != 0:
+		stop_container( client, source[ 'name' ], remove=True )
+	
+	ports = params.get( 'ports', {} )
+	volumes = params.get( 'volumes', {} )
+
+	volume_list = [ spec[ 'bind' ] for hpath, spec in volumes.items() ]
+
+	container = client.create_container( image=source[ 'image' ], name=source[ 'name' ], detach=True, ports=list(ports.keys()), environment=params.get( 'env', [] ), volumes=volume_list )
+
+	print( "Created container:", container )
+
+	response = client.start( container.get( 'Id' ), port_bindings=ports, binds=volumes, volumes_from=params.get( 'volumes_from', [] ) )
+
+	if response is None:
+		print( "Container started" )
+		print( ('{"version":{"ref":"%s"}}' % container.get( 'Id' )), file=sys.__stdout__)
+	else:
+		print( response )
+		sys.exit( 1 )
+
+if params[ 'cmd' ] == 'stop':
+	stop_container( client, source[ 'name' ], remove=False )
+	print( '{"version":{"ref":""}}', file=sys.__stdout__)
+
+if params[ 'cmd' ] == 'remove':
+	stop_container( client, source[ 'name' ], remove=True )
+	print( '{"version":{"ref":""}}', file=sys.__stdout__)
+

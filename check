@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+
+import sys
+import json
+
+from common import source, find_container, client
+
+res = []
+
+c = find_container( client, source[ 'name' ], False )
+if c is not None:
+	res.append( c[ 'Id' ] )
+
+print(json.dumps(res), file=sys.__stdout__)
+
