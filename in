@@ -4,7 +4,7 @@ import os
 import sys
 import json
 
-from common import source, payload, client
+from common import source, params, payload, client
 
 dest = sys.argv[ 1 ]
 
@@ -19,8 +19,18 @@ try:
 	with open( ("%s/inspect" % dest), "w" ) as f:
 		f.write( json.dumps( inspect, indent=2 ) )
 		id = inspect[ 'Id' ]
+
+	export_env = params.get( 'export_env', None )
+
+	if export_env is not None:
+		with open( ("%s/env" % dest), "w" ) as f:
+			f.write( "%s_IP=%s\n" % (export_env, inspect[ 'NetworkSettings' ][ 'IPAddress' ] ) )
+
+		with open( ("%s/shenv" % dest), "w" ) as f:
+			f.write( "export %s_IP=%s\n" % (export_env, inspect[ 'NetworkSettings' ][ 'IPAddress' ] ) )
+
 except Exception as e:
-	print( "Unable to inspect container", e )
+	print( "Unable to inspect container:", e )
 
 print(json.dumps({'version':{'ref':id}}), file=sys.__stdout__)
 
